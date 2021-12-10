@@ -18,6 +18,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -28,16 +31,17 @@ import javafx.collections.ObservableList;
 public class CollaborationAnalyzer implements CollaborationAnalyzerInterface {
 	private HashMap<String, HashSet<Song>> artistsToSongs; // maps artist names (Strings) to Songs
 	private ObservableList<String> artistList; // ObservableList to use for artist selection ComboBoxes
+	private ObservableList<String> songTitles; 
+	private ObservableValue<Number> librarySize;
 	private HashSet<Song> songSet; // we cache a set of all our songs for performance
-	private ObservableList<String> songTitles;
 
 	private static <T> ArrayList<T> sorted(Collection<T> collection) {
 		if (collection != null) {
 			ArrayList<T> ret = new ArrayList<T>(collection);
 			ret.sort(null); // use 'natural' ordering defined by .compareTo()
 			return ret;
-		} else
-			return new ArrayList<T>();
+		}
+		else return new ArrayList<T>();
 	}
 
 	/**
@@ -48,6 +52,8 @@ public class CollaborationAnalyzer implements CollaborationAnalyzerInterface {
 		this.songSet = new HashSet<Song>();
 		this.artistList = FXCollections.observableArrayList();
 		this.songTitles = FXCollections.observableArrayList();
+		// this.librarySize = new ReadOnlyObjectWrapper<Integer>(Integer.valueOf(0));
+		this.librarySize = new SimpleIntegerProperty(0);
 	}
 
 	/**
@@ -68,6 +74,7 @@ public class CollaborationAnalyzer implements CollaborationAnalyzerInterface {
 			HashSet<Song> artistsSongs = this.artistsToSongs.getOrDefault(a, new HashSet<Song>());
 			artistsSongs.add(s);
 			this.artistsToSongs.put(a, artistsSongs); // sets HashSet in case we created a new one above
+			getSongTitles();
 			if (!this.artistList.contains(a))
 				this.artistList.add(a);
 		}
@@ -88,6 +95,7 @@ public class CollaborationAnalyzer implements CollaborationAnalyzerInterface {
 		ArrayList<String> artistList = new ArrayList<String>(Arrays.asList(artists.split("\\s*,\\s*")));
 		Song song = new Song(title, artistList, genre);
 		this.addSong(song);
+		
 	}
 
 	/**
@@ -109,6 +117,7 @@ public class CollaborationAnalyzer implements CollaborationAnalyzerInterface {
 				this.artistList.remove(a);
 			}
 		}
+		getSongTitles();
 		return found;
 	}
 
@@ -138,25 +147,31 @@ public class CollaborationAnalyzer implements CollaborationAnalyzerInterface {
 	public ObservableList<String> getArtistNames() {
 		return this.artistList;
 	}
-
+	
+	/**
+	 * Gets an observable list of song titles
+	 * @return songTitles list
+	 */
+	public ObservableList<String> getSongTitles(){
+		for (Song s : songSet) {
+			songTitles.add(s.getTitle());
+		}
+		return this.songTitles;
+	}
+	
+	
 	/**
 	 * Gets the size of songSet
-	 * 
 	 * @return size
 	 */
-	@Override
 	public int getSongSetSize() {
 		return songSet.size();
 	}
 
-	@Override
-	public ObservableList<String> getSongSet() {
-		for (Song s : songSet) {
-			songTitles.add(s.getTitle());
-		}
-		return songTitles;
+	public ObservableValue<Number> getLibrarySize(){
+		librarySize = new SimpleIntegerProperty(songSet.size());
+		return librarySize;
 	}
-
 	/**
 	 * Gets a sorted (first by title, then by primary artist) list of Songs
 	 * associated with an Artist
