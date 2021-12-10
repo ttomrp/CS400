@@ -1,0 +1,20 @@
+#	Track Title	Artist	Album	Genre	BPM	Rating	Time	Key	Date Added	Label	Remixer	File Name
+4	Bastion (Original Mix)	Nigel Good	Space Cadet	House	90	     	1:58	Em	7/29/2017	Monstercat		Em - 90 - 7208715_Bastion_Original_Mix.mp3
+8	I'm Not Like Everybody Else feat. Sub Teal (Extended Mix)	Gabriel & Dresden, Sub Teal	The Only Road - Extended Mixes	Dance	135	     	7:38	Em	5/22/2020	Anjunabeats		Em - 135 - 10029821_I_m_Not_Like_Everybody_Else_feat__Sub_Teal_Extended_Mix.mp3
+14	Clap Your Hands (Sex Machine Mix)	Funk The Beat	Clap Your Hands	Disco House	120	***  	5:20	Em	1/24/2018	PPMUSIC		Em or Bm - 120 - 10048788_Clap_Your_Hands_Sex_Machine_Mix.mp3
+16	This Is Forever (Original Mix)	Nigel Good	Space Cadet	House	121	     	2:58	F	7/29/2017	Monstercat		F - 91 - 7208709_This_Is_Forever_Original_Mix.mp3
+17	An Adventure (feat. Davek) (Original Mix)	Nigel Good	Space Cadet	House	90.75	     	1:51	F	7/29/2017	Monstercat		F - 91 - 7208710_An_Adventure__feat__Davek__Original_Mix.mp3
+21	Black Hole (Extended Vocal Mix)	LTN, Arielle Maren, Stendahl	Black Hole	Deep House	124	     	5:36	F	4/23/2018	Silk Music		F - 124 - 10235450_Black_Hole_Extended_Vocal_Mix.mp3
+22	Terminator 2018 (Original Mix)	Westbam, Compact Grey	Toolroom 15	Tech House	125	     	6:09	F	4/23/2018	Toolroom		F - 125 - 10366762_Terminator_2018_Original_Mix.mp3
+23	The Rebel (Original Mix)	Pagano	Toolroom 15	Tech House	125	     	7:12	F	4/23/2018	Toolroom		F - 125 - 10366769_The_Rebel_Original_Mix.mp3
+26	Liberate (Original Mix)	Eric Prydz	Liberate	Progressive House	127	     	6:42	F	3/8/2015	Pryda Recordings		F - 127 - 5243321_Liberate_Original_Mix.mp3
+31	Another Lover feat. Koven (Extended Mix)	Ilan Bluestone, Koven	Scars - Extended Mixes	Trance	132	***  	6:10	F	6/12/2018	Anjunabeats		F - 132 - 10538435_Another_Lover_feat__Koven_Extended_Mix.mp3
+35	Dont Want To Go (feat. Go Periscope) (Original Mix)	Nigel Good	Space Cadet	Indie Dance / Nu Disco	110	     	4:08	F#	7/29/2017	Monstercat		F# - 110 - 7208719_Dont_Want_To_Go__feat__Go_Periscope__Original_Mix.mp3
+36	Eclipse (Original Mix)	Ilan Bluestone	Scars - Extended Mixes	Chill Out	93.33	*    	3:51	F#	6/12/2018	Anjunabeats		F# - 113 - 10538437_Eclipse_Original_Mix.mp3
+39	Be (Klangkuenstler Remix)	Rowetta, Greco (NYC)	Be (Klangkuenstler Remix)	Tech House	124	     	6:48	F#	9/29/2017	Rawsome Recordings	KlangKuenstler	F# - 124 - 9548091_Be_Klangkuenstler_Remix.mp3
+41	Acid Lights (Darius Syrossian Remix)	Ronnie Spiteri	Toolroom Ibiza 2017	Tech House	125	     	5:57	F#	5/22/2020	Toolroom	Darius Syrossian	F# - 125 - 9253368_Acid_Lights_Darius_Syrossian_Remix.mp3
+44	Tank Logic	Jaytech	Summer 2014 Mix	Progressive House	126	***  	6:30	F#	7/1/2018	Positronic Digital		F# - 126 - Tank Logic.mp3
+45	So Many Times (Blood Groove & Kikis Remix)	August Rush feat. Natalie Voice	So Many Times (incl. Luiz B, Blood Groove & Kikis Remixes)	Progressive House	127	***  	7:54	F#	12/8/2013	SPRING TUBE 		F# - 127 - August Rush feat. Natalie Voice - So Many Times (Blood Groove & Kikis Remix)[electrotrack.pl].mp3
+49	Reboot	Ummet Ozcan	Mix 55	Trance	132	     	7:10	F#	6/23/2012	Doorn Records		F# - 132 - Ummet Ozcan - Reboot (Original Mix)[www.top1musc.net].mp3
+60	All We Need (feat. Shy Girls) (John Digweed & Nick Muir Remix)	Shy Girls, ODESZA	All We Need Remixes	Tech House	118	     	7:37	F#m	4/22/2016	Counter Records	Nick Muir, John Digweed	F#m - 118 - 11 All We Need (feat. Shy Girls) (Jo.mp3
+65	Throw Your Hands (Sharam Jey Remix)	Kolombo	Bunny Tiger Summer Sampler. Vol. 6	Future House	120	     	5:22	F#m	11/21/2017	Bunny Tiger	Sharam Jey	F#m - 120 - 9613244_Throw_Your_Hands_Sharam_Jey_Remix.mp3
