@@ -2,6 +2,7 @@ package application;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -18,63 +19,79 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 /**
- * @author Jon
- *
+ * Filename: CollaborationAnalyzer.java
+ * 
+ * Project: Final Project
+ * 
+ * Team: a4
+ * 
+ * Authors: Adam Cook, Felix Lin, Jonathan McMahon, Tomas Perez, Matthias
+ * Schmitz
+ * 
+ * Semester: Fall 2021 Course: CS400
+ * 
+ * Back-end class that defines the implements our data structure.
  */
-public class CollaborationAnalyzer implements CollaborationAnalyzerInterface {
+public class CollaborationAnalyzer extends CollaborationAnalyzerAbstract {
 	private HashMap<String, HashSet<Song>> artistsToSongs; // maps artist names (Strings) to Songs
-	private ObservableList<String> artistList; // ObservableList to use for artist selection ComboBoxes
-	private ObservableList<String> songTitles; 
-	private ObservableValue<Number> librarySize;
-	private HashSet<Song> songSet; // we cache a set of all our songs for performance
+	private ObservableList<String> artistList; // ObservableList to use for artist selection ComboBoxes. same artists as
+												// in artistsTosongs
+	private HashSet<Song> songSet; // we cache a set of all our songs, which are also found in artistsToSongs
+	private SimpleIntegerProperty librarySize; // track the number of songs in the library
 
-	private static <T> ArrayList<T> sorted(Collection<T> collection) {
+	/**
+	 * Private helper to put a Collection of any kind into a sorted arrayList
+	 * 
+	 * @param <T>        type of data in the lists/collection
+	 * @param collection the existing collectiton
+	 * @return the new, sorted ArrayList
+	 */
+	private <T> ArrayList<T> sorted(Collection<T> collection) {
 		if (collection != null) {
 			ArrayList<T> ret = new ArrayList<T>(collection);
 			ret.sort(null); // use 'natural' ordering defined by .compareTo()
 			return ret;
-		}
-		else return new ArrayList<T>();
+		} else
+			return new ArrayList<T>();
 	}
 
 	/**
-	 * Construct a new Collaboration Analyzer with no songs/artists
+	 * Construct a new Collaboration Analyzer with no songs/artists and initialize
+	 * data elements
+	 * 
 	 */
-	public CollaborationAnalyzer() {
+	protected CollaborationAnalyzer() {
+		// we just create empty data structures
 		this.artistsToSongs = new HashMap<String, HashSet<Song>>();
 		this.songSet = new HashSet<Song>();
 		this.artistList = FXCollections.observableArrayList();
-		this.songTitles = FXCollections.observableArrayList();
-		// this.librarySize = new ReadOnlyObjectWrapper<Integer>(Integer.valueOf(0));
 		this.librarySize = new SimpleIntegerProperty(0);
 	}
 
 	/**
-	 * Add a song to the collaboration analyzer
+	 * Add a song to the collaboration analyzer.
 	 * 
 	 * @param s the Song to add
 	 * @throws DuplicateSongException if the Song is already present
 	 */
 	@Override
-	public void addSong(Song s) throws DuplicateSongException {
-		assert (s != null);
+	protected void addSong(Song s) throws DuplicateSongException {
 		if (this.songSet.contains(s)) {
 			throw new DuplicateSongException();
 		}
 		this.songSet.add(s);
+		this.librarySize.set(songSet.size());
 		for (String a : s.getArtists()) {
 			// songs by artist is what we have stored or oterhwise just an empty set
 			HashSet<Song> artistsSongs = this.artistsToSongs.getOrDefault(a, new HashSet<Song>());
 			artistsSongs.add(s);
 			this.artistsToSongs.put(a, artistsSongs); // sets HashSet in case we created a new one above
-			getSongTitles();
 			if (!this.artistList.contains(a))
 				this.artistList.add(a);
 		}
@@ -88,47 +105,67 @@ public class CollaborationAnalyzer implements CollaborationAnalyzerInterface {
 	 * @param genre   - genre of song
 	 * @throws DuplicateSongException if the Song is already present
 	 */
-	public void addSong(String title, String artists, String genre)
+	@Override
+	protected void addSong(String title, String artists, String genre)
 			throws DuplicateSongException, InvalidSongException {
-		// TODO finish implementing this method
-		// TODO convert comma delimited list to List<String for song constructor
+		// first create the artist list by splitting on comma, ignoring whitespace
 		ArrayList<String> artistList = new ArrayList<String>(Arrays.asList(artists.split("\\s*,\\s*")));
 		Song song = new Song(title, artistList, genre);
 		this.addSong(song);
-		
 	}
 
 	/**
-	 * Removes a song, if it's present
+	 * Removes a song if it's present in the data set
 	 * 
-	 * @param s the Song to add
+	 * @param s the Song to remove, which must not be null
 	 * @return true if a matching song was found and removed, otherwise false
 	 */
 	@Override
-	public boolean removeSong(Song s) {
-		assert (s != null);
+	protected boolean removeSong(Song s) {
 		boolean found = this.songSet.remove(s);
+		this.librarySize.set(songSet.size());
 		for (String a : s.getArtists()) {
-			assert (this.artistsToSongs.containsKey(a));
-			this.artistsToSongs.get(a).remove(s);
-			// delete artists who aren't involved with any songs anymore
-			if (this.artistsToSongs.get(a).isEmpty()) {
-				this.artistsToSongs.remove(a);
-				this.artistList.remove(a);
+			if (this.artistsToSongs.containsKey(a)) {
+				this.artistsToSongs.get(a).remove(s);
+				// delete artists who aren't involved with any songs anymore
+				if (this.artistsToSongs.get(a).isEmpty()) {
+					// remove from both Artist -> [Songs] mapping & list of artists
+					this.artistsToSongs.remove(a);
+					this.artistList.remove(a);
+				}
 			}
 		}
-		getSongTitles();
 		return found;
 	}
 
-	public boolean removeSong(String title, String artist) {
-		// TODO, get Song object based on title & artists
+	/**
+	 * Deletes a song from the existing data set if it's present
+	 * 
+	 * @param title  title of the song to remove (must be exact match)
+	 * @param artist one of the artists on the song to remove (must be exact match)
+	 * @return true if a matching song was found and removed, otherwise false
+	 */
+	protected boolean removeSong(String title, String artist) {
+		// Get Song object based on title & artists
 		Song song = getSongForTitleAndArtist(title, artist);
-		return removeSong(song);
+		if (song != null) {
+			// removeSong will throw on a null Song
+			return removeSong(song);
+		} else {
+			return false; // song wasn't found, so can't be removed.
+		}
 	}
 
+	/**
+	 * Gets a Song (not necessarily the only one) matching the given title and
+	 * artist
+	 * 
+	 * @param title  the title of the song to find (must match exactly)
+	 * @param artist the artist's name (must match exactly)
+	 * @return a Song object or null
+	 */
 	@Override
-	public Song getSongForTitleAndArtist(String title, String artist) {
+	protected Song getSongForTitleAndArtist(String title, String artist) {
 		List<Song> songList = getSongList(artist);
 		for (Song song : songList) {
 			if (title.equals(song.getTitle())) {
@@ -141,37 +178,23 @@ public class CollaborationAnalyzer implements CollaborationAnalyzerInterface {
 	/**
 	 * Gets an alphabetically sorted list of all relevant artists
 	 * 
-	 * @return a sorted list of all artists
+	 * @return a sorted JavaFX ObservableList of all artists
 	 */
 	@Override
-	public ObservableList<String> getArtistNames() {
+	protected ObservableList<String> getArtistNames() {
 		return this.artistList;
 	}
-	
-	/**
-	 * Gets an observable list of song titles
-	 * @return songTitles list
-	 */
-	public ObservableList<String> getSongTitles(){
-		for (Song s : songSet) {
-			songTitles.add(s.getTitle());
-		}
-		return this.songTitles;
-	}
-	
-	
-	/**
-	 * Gets the size of songSet
-	 * @return size
-	 */
-	public int getSongSetSize() {
-		return songSet.size();
-	}
 
-	public ObservableValue<Number> getLibrarySize(){
-		librarySize = new SimpleIntegerProperty(songSet.size());
+	/**
+	 * Gets the size of the library. Similar to getSongSetSize, but used for the GUI
+	 * 
+	 * @return songSet.size() as an Observable Value
+	 */
+	@Override
+	protected IntegerProperty getLibrarySize() {
 		return librarySize;
 	}
+
 	/**
 	 * Gets a sorted (first by title, then by primary artist) list of Songs
 	 * associated with an Artist
@@ -180,28 +203,10 @@ public class CollaborationAnalyzer implements CollaborationAnalyzerInterface {
 	 * @return List of Songs associated with the artist
 	 */
 	@Override
-	public List<Song> getSongList(String artist) {
+	protected List<Song> getSongList(String artist) {
 		return sorted(this.artistsToSongs.get(artist));
 	}
 
-	/**
-	 * Gets a sorted (first by title, then by primary artist) list of Songs whose
-	 * titles loosely match a filter string
-	 * 
-	 * @param searchStr the filter string
-	 * @return the list of Songs that match serachStr
-	 */
-	@Override
-	public List<Song> getSongListMatching(String searchStr) {
-		HashSet<Song> matchingSet = new HashSet<Song>();
-		for (Song s : this.songSet) {
-			if (s.searchMatches(searchStr)) {
-				matchingSet.add(s);
-			}
-		}
-
-		return sorted(matchingSet);
-	}
 
 	/**
 	 * Gets a sorted (alphabetically) list of collaborators directly associated with
@@ -212,7 +217,7 @@ public class CollaborationAnalyzer implements CollaborationAnalyzerInterface {
 	 *         always be in this list
 	 */
 	@Override
-	public List<String> getCollaboratorList(String artist) {
+	protected List<String> getCollaboratorList(String artist) {
 		HashSet<String> dedupList = new HashSet<String>();
 		for (Song s : this.getSongList(artist)) {
 			dedupList.addAll(s.getArtists());
@@ -220,12 +225,20 @@ public class CollaborationAnalyzer implements CollaborationAnalyzerInterface {
 		return sorted(dedupList);
 	}
 
+	/**
+	 * Imports list of songs from a flat file into the existing collaboration
+	 * analyzer adding to whatever songs (if any) are already loaded
+	 * 
+	 * @param file the File object which contains the data. Must be open for reading
+	 */
 	@Override
-	public void importFile(File file) throws FileNotFoundException {
+	protected void importFile(File file) throws FileNotFoundException {
+		// set up our processor
 		MusicLibraryFileProcessor fileProcessor = new MusicLibraryFileProcessor();
-		HashSet<Song> fileSongSet = null;
-		fileSongSet = fileProcessor.importFile(file);
+		// load file into processor
+		HashSet<Song> fileSongSet = fileProcessor.importFile(file);
 		Iterator<Song> songIterator = fileSongSet.iterator();
+		// keep adding songs as long as there are rows in the file to add
 		while (songIterator.hasNext()) {
 			try {
 				addSong(songIterator.next());
@@ -236,12 +249,29 @@ public class CollaborationAnalyzer implements CollaborationAnalyzerInterface {
 		return;
 	}
 
+	/**
+	 * Writes all entered songs to a file of the given name
+	 * 
+	 * @param fileName the name of the file to save
+	 * @throws IOException if something goes wrong
+	 */
 	@Override
-	public void outputFile(String fileName) throws FileNotFoundException {
+	protected void outputFile(String fileName) throws IOException {
+		// creates a new file
 		File file = new File(fileName);
+		outputFile(file);
+	}
+
+	/**
+	 * Output library to already-existing output file
+	 * 
+	 * @param file the file where to export
+	 * @throws IOException if something goes wrong
+	 */
+	@Override
+	protected void outputFile(File file) throws IOException {
 		MusicLibraryFileProcessor fileProcessor = new MusicLibraryFileProcessor();
 		fileProcessor.exportFile(file, songSet);
-		return;
 	}
 
 	/**
@@ -258,10 +288,12 @@ public class CollaborationAnalyzer implements CollaborationAnalyzerInterface {
 	 *         in the data structure, or the same artist is passed in twice.
 	 */
 	@Override
-	public List<Song> getPathBetweenArtists(String artistName1, String artistName2) {
+	protected List<Song> getPathBetweenArtists(String artistName1, String artistName2) {
+		// Null artist names aren't accepted
 		if (artistName1 == null || artistName2 == null) {
 			return null;
 		}
+		// If either artist isn't in the analyzer or both artists are the same, quit
 		if (artistName1.equals(artistName2) || !artistsToSongs.containsKey(artistName1)
 				|| !artistsToSongs.containsKey(artistName2)) {
 			return null;
@@ -270,10 +302,11 @@ public class CollaborationAnalyzer implements CollaborationAnalyzerInterface {
 		// Use a class for queue entries so that we know not only the next
 		// artist to search, but also store the path of how we got there
 		class QueueEntry {
-			public String artist;
-			public ArrayList<Song> path;
+			protected String artist;
+			protected ArrayList<Song> path;
 
-			public QueueEntry(String a, ArrayList<Song> p) {
+			// create a new queue entry based on a string and artist path
+			protected QueueEntry(String a, ArrayList<Song> p) {
 				artist = a;
 				path = p;
 			}
@@ -289,10 +322,17 @@ public class CollaborationAnalyzer implements CollaborationAnalyzerInterface {
 
 		// Go until the queue unwinds, unless we find a path to artist 2
 		while (!queue.isEmpty()) {
-			QueueEntry queueEntry = queue.peek();
+			QueueEntry queueEntry = queue.remove();
 
 			// Loop through this artist's songs
 			for (Song song : this.getSongList(queueEntry.artist)) {
+
+				// Add the song connecting to this next artist
+				// to a shallow copy of the existing path
+				// make shallow copy
+				ArrayList<Song> newPath = new ArrayList<Song>(queueEntry.path);
+				// append "current" song to the 'so far' path
+				newPath.add(song);
 
 				// Loop through other artists on the song
 				for (String nextArtist : song.getArtists()) {
@@ -301,14 +341,6 @@ public class CollaborationAnalyzer implements CollaborationAnalyzerInterface {
 					if (visitedArtists.contains(nextArtist)) {
 						continue;
 					}
-
-					// Add the song connecting to this next artist
-					// to a shallow copy of the existing path
-					ArrayList<Song> newPath = new ArrayList<Song>();
-					queueEntry.path.forEach((s) -> {
-						newPath.add(s);
-					});
-					newPath.add(song);
 
 					// If we found artist 2, stop and return the path
 					if (nextArtist.equals(artistName2)) {
@@ -322,31 +354,90 @@ public class CollaborationAnalyzer implements CollaborationAnalyzerInterface {
 				}
 			}
 
-			// Done searching this artist, pop off the queue
-			queue.remove();
 		}
 
 		// If the queue unwound all the way, we didn't find a path from 1 to 2 :(
 		return new ArrayList<Song>();
 	}
 
+	/**
+	 * Get a sorted list of Songs which are a degree away from the artist in
+	 * question
+	 * 
+	 * @param artistName the name of the artist (must be an exact match)
+	 * @return the list of songs on which the passed artist's collaborators worked
+	 *
+	 */
 	@Override
-	public List<Song> listCollaboratedSongs(String artistName) {
+	protected List<Song> getSimilarSongs(String artistName) {
 		if (artistName == null) {
 			return null;
 		}
 		List<String> collaborators = getCollaboratorList(artistName);
+		// don't want to include the initial artist in the "1-degree away" songs
 		collaborators.remove(artistName);
 		List<Song> songList = new ArrayList<Song>();
 		for (String c : collaborators) {
 			List<Song> cSongs = getSongList(c);
 			for (Song s : cSongs) {
+				// only add songs on which the initial artist didn't work directly
 				if (!s.getArtists().contains(artistName)) {
 					songList.add(s);
 				}
 			}
 		}
 		return sorted(songList);
+	}
+
+	/**
+	 * Given an artist name, returns a list of all artists who are connected to that
+	 * artist by any degree of separation
+	 * 
+	 * @param artist the artist's name (must match exactly)
+	 * @return a List of connected artist names. Returns null for invalid input.
+	 *         Returns an empty list if an artist has no collaborators :(
+	 */
+	@Override
+	protected ObservableList<String> getAllConnectedArtists(String artistName) {
+		// Must input the name of an artist in the library
+		if (artistName == null || !artistsToSongs.containsKey(artistName)) {
+			return null;
+		}
+
+		// Set up a list to return,
+		ArrayList<String> connectedArtists = new ArrayList<String>();
+		// a queue for a breadth-first search,
+		Queue<String> queue = new LinkedList<String>();
+		// and a list of visited artists for that BFS
+		HashSet<String> visitedArtists = new HashSet<String>();
+
+		// Add the first artist to the queue to kick things off
+		queue.add(artistName);
+		visitedArtists.add(artistName);
+
+		// Go until the queue unwinds
+		while (!queue.isEmpty()) {
+			String queueEntry = queue.remove();
+
+			// Get this artist's list of collaborators and loop through them
+			List<String> collaborators = getCollaboratorList(queueEntry);
+			for (String collaborator : collaborators) {
+				// Skip any artists the search has already evaluated
+				if (visitedArtists.contains(collaborator)) {
+					continue;
+				}
+
+				// Otherwise, add to the queue,
+				queue.add(collaborator);
+				// the return list,
+				connectedArtists.add(collaborator);
+				// and the list of visited artists
+				visitedArtists.add(collaborator);
+			}
+		}
+
+		// Sort the list of all connected artists and return it
+		return FXCollections.observableArrayList(sorted(connectedArtists));
 	}
 
 }
